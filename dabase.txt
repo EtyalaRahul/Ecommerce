@@ -1,0 +1,9 @@
+--register
+  name 
+  email 
+  phone number 
+  password 
+  gender 
+  age 
+
+  
