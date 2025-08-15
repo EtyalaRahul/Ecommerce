@@ -5,7 +5,9 @@ const app = express();
 const jwt = require("jsonwebtoken");
 app.use(express.json());
 const bcrypt = require("bcrypt");
+const cors = require("cors");
 const JWT_SECRET = "mysecretkey";
+app.use(cors());
 
 //models
 // createRegisterTable();
