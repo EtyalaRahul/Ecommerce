@@ -2,8 +2,13 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NotFound from "./components/NotFound";
 
-const Home = () => <h1>Welcome to Home Page</h1>;
+const Home = () => (
+  <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <h1>Welcome to Home Page</h1>
+  </div>
+);
 
 const App = () => {
   return (
@@ -11,13 +16,14 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
-          path="/home"
+          path="/"
           element={
             <ProtectedRoute>
               <Home />
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
