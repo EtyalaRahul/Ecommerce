@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Cookie from "js-cookie";
 import { Navigate } from "react-router-dom";
 import "./login.css";
+import Navbar from "../Navbar/Navbar";
 
 class Login extends Component {
   state = {
@@ -134,157 +135,160 @@ class Login extends Component {
     }
 
     return (
-      <div className="full-center-wrapper">
-        <div className="login-container">
-          <div className="illustration">
-            <img
-              src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-login-img.png"
-              alt="Illustration"
-            />
-          </div>
+      <>
+        <Navbar />
+        <div className="full-center-wrapper">
+          <div className="login-container">
+            <div className="illustration">
+              <img
+                src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-login-img.png"
+                alt="Illustration"
+              />
+            </div>
 
-          <div className="login-form">
-            <h1>
-              ATELIER<span className="highlight"> LUXE</span>
-            </h1>
+            <div className="login-form">
+              <h1>
+                ATELIER<span className="highlight"> LUXE</span>
+              </h1>
 
-            {isRegister ? (
-              <>
-                <div className="input-group">
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={first_name}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Last Name</label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={last_name}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="text"
-                    name="phone_number"
-                    value={phone_number}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Gender</label>
-                  <select
-                    name="gender"
-                    value={gender}
-                    onChange={this.handleChange}
+              {isRegister ? (
+                <>
+                  <div className="input-group">
+                    <label>First Name</label>
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={first_name}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Last Name</label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={last_name}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={email}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="text"
+                      name="phone_number"
+                      value={phone_number}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={password}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Gender</label>
+                    <select
+                      name="gender"
+                      value={gender}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>Age</label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={age}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  {errorMsg && <p className="error-message">{errorMsg}</p>}
+                  <button
+                    className="login-btn"
+                    onClick={this.handleRegister}
                     disabled={loading}
                   >
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </div>
-                <div className="input-group">
-                  <label>Age</label>
-                  <input
-                    type="number"
-                    name="age"
-                    value={age}
-                    onChange={this.handleChange}
+                    {loading ? "Registering..." : "Register"}
+                  </button>
+                  <p className="toggle-text">
+                    Already have an account?{" "}
+                    <span
+                      className="toggle-link"
+                      onClick={() => this.setState({ isRegister: false })}
+                    >
+                      Login here
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="input-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={email}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={password}
+                      onChange={this.handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                  {errorMsg && <p className="error-message">{errorMsg}</p>}
+                  <button
+                    className="login-btn"
+                    onClick={this.handleLogin}
                     disabled={loading}
-                  />
-                </div>
-                {errorMsg && <p className="error-message">{errorMsg}</p>}
-                <button
-                  className="login-btn"
-                  onClick={this.handleRegister}
-                  disabled={loading}
-                >
-                  {loading ? "Registering..." : "Register"}
-                </button>
-                <p className="toggle-text">
-                  Already have an account?{" "}
-                  <span
-                    className="toggle-link"
-                    onClick={() => this.setState({ isRegister: false })}
                   >
-                    Login here
-                  </span>
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="input-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={this.handleChange}
-                    disabled={loading}
-                  />
-                </div>
-                {errorMsg && <p className="error-message">{errorMsg}</p>}
-                <button
-                  className="login-btn"
-                  onClick={this.handleLogin}
-                  disabled={loading}
-                >
-                  {loading ? "Logging in..." : "Login"}
-                </button>
-                <p className="toggle-text">
-                  Don’t have an account?{" "}
-                  <span
-                    className="toggle-link"
-                    onClick={() => this.setState({ isRegister: true })}
-                  >
-                    Register here
-                  </span>
-                </p>
-              </>
-            )}
+                    {loading ? "Logging in..." : "Login"}
+                  </button>
+                  <p className="toggle-text">
+                    Don’t have an account?{" "}
+                    <span
+                      className="toggle-link"
+                      onClick={() => this.setState({ isRegister: true })}
+                    >
+                      Register here
+                    </span>
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 }

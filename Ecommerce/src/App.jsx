@@ -2,13 +2,8 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
-import NotFound from "./components/NotFound";
-
-const Home = () => (
-  <div style={{ textAlign: "center", marginTop: "50px" }}>
-    <h1>Welcome to Home Page</h1>
-  </div>
-);
+import NotFound from "./components/NotFound"; // don't forget to import this
+import Home from "./components/Home/Home";
 
 const App = () => {
   return (
@@ -23,6 +18,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
