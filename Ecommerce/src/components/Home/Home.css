@@ -179,3 +179,13 @@
   text-align: center;
   font-weight: 600;
 }
+.carousel-container {
+  margin-bottom: 20px;
+}
+
+.carousel-container .carousel .slide img {
+  height: 60vh;       
+  object-fit: cover;  
+  width: 100%;        
+  border-radius: 12px; 
+}
