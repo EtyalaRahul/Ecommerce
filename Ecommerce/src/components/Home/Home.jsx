@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { motion } from "framer-motion";
 import "./Home.css";
 
 const BASE_URL = "http://localhost:3000/api";
@@ -12,31 +13,47 @@ class Home extends Component {
         products: [],
         cart: JSON.parse(localStorage.getItem("cart")) || [],
         selectedCategory: null,
+        isMobileMenuOpen: false,
     };
 
     categories = [
-        "Produce",
-        "Prepared foods",
-        "Canned foods & Soups",
+        "Prepared Foods",
+        "Canned Foods & Soups",
         "Bakery",
         "Dairy & Eggs",
         "Frozen",
         "Meat & Seafood",
-        "Toys & Games",
-        "Books & Stationery",
+        "Snacks & Confectionery",
+        "Beverages",
+        "Grains & Pulses",
         "Fruits",
-        "Noodles",
+        "Vegetables",
+        "Spices & Condiments",
+        "Cooking Essentials",
+        "Household Supplies",
+        "Noodles"
     ];
 
     carouselImages = [
-        "https://cdn2.hubspot.net/hubfs/53/ecommerce%20marketing.jpg",
-        "https://c4.wallpaperflare.com/wallpaper/910/11/748/background-fruit-vegetables-cuts-hd-wallpaper-preview.jpg",
-        "https://res.cloudinary.com/dasm9k1z9/image/upload/v1755432239/ChatGPT_Image_Aug_17_2025_05_33_15_PM_doasma.png",
+        "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+        "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+        "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     ];
 
     componentDidMount() {
         this.fetchProducts();
+        window.addEventListener("resize", this.handleResize);
     }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.handleResize);
+    }
+
+    handleResize = () => {
+        if (window.innerWidth > 768 && this.state.isMobileMenuOpen) {
+            this.setState({ isMobileMenuOpen: false });
+        }
+    };
 
     fetchProducts = async () => {
         try {
@@ -107,42 +124,74 @@ class Home extends Component {
         localStorage.setItem("cart", JSON.stringify(updatedCart));
     };
 
+    toggleMobileMenu = () => {
+        this.setState(prevState => ({ isMobileMenuOpen: !prevState.isMobileMenuOpen }));
+    };
+
     render() {
-        const { products, cart, selectedCategory } = this.state;
+        const { products, cart, selectedCategory, isMobileMenuOpen } = this.state;
         const filteredProducts = selectedCategory
             ? products.filter((p) => p.category === selectedCategory)
             : [];
 
         return (
             <>
-                <Navbar />
+                <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} />
                 <div className="home-layout">
-                    <aside className="sidebar">
-                        <h2>Categories</h2>
-                        <ul>
+                    {/* Mobile Menu Button */}
+                    <button
+                        className="mobile-menu-btn"
+                        onClick={this.toggleMobileMenu}
+                    >
+                        {isMobileMenuOpen ? '✕' : '☰'}
+                    </button>
+
+                    <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+                        <h2 className="sidebar-title">Categories</h2>
+                        <ul className="category-list">
                             {this.categories.map((cat) => (
-                                <li key={cat}>
+                                <motion.li
+                                    key={cat}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
                                     <button
-                                        className={`category-btn ${selectedCategory === cat ? "active" : ""
-                                            }`}
-                                        onClick={() => this.setState({ selectedCategory: cat })}
+                                        className={`category-btn ${selectedCategory === cat ? "active" : ""}`}
+                                        onClick={() => {
+                                            this.setState({ selectedCategory: cat });
+                                            if (window.innerWidth <= 768) {
+                                                this.setState({ isMobileMenuOpen: false });
+                                            }
+                                        }}
                                     >
                                         {cat}
                                     </button>
-                                </li>
+                                </motion.li>
                             ))}
                         </ul>
 
-                        <div className="cart-summary">
-                            <h3>🛒 Cart</h3>
-                            <p>{cart.length} items</p>
+                        <motion.div
+                            className="cart-summary"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <h3>🛒 Cart Summary</h3>
+                            <p>{cart.reduce((acc, item) => acc + item.quantity, 0)} items</p>
+                            <p>₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</p>
                             <Link to="/cart">
-                                <button className="view-cart-btn">View Cart</button>
+                                <motion.button
+                                    className="view-cart-btn"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    View Cart
+                                </motion.button>
                             </Link>
-                        </div>
+                        </motion.div>
                     </aside>
 
-                    <main className="main" >
+                    <main className="main">
                         {!selectedCategory && (
                             <div className="carousel-container">
                                 <Carousel
@@ -151,49 +200,106 @@ class Home extends Component {
                                     showThumbs={false}
                                     showStatus={false}
                                     interval={5000}
+                                    showArrows={true}
+                                    dynamicHeight={false}
+                                    emulateTouch={true}
                                 >
                                     {this.carouselImages.map((img, index) => (
-                                        <div key={index}>
+                                        <div key={index} className="carousel-slide">
                                             <img src={img} alt={`Slide ${index + 1}`} />
+                                            <div className="carousel-overlay"></div>
+                                            <div className="carousel-content">
+                                                <h2>Fresh Groceries Delivered</h2>
+                                                <p>Shop the best quality products at affordable prices</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </Carousel>
                                 <div className="welcome-msg">
-                                    <h2>🛍️ Select a category to browse products</h2>
+                                    <motion.h2
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                    >
+                                        🛍️ Select a category to browse products
+                                    </motion.h2>
                                 </div>
                             </div>
                         )}
 
                         {selectedCategory && (
-                            <section className="category-section">
-                                <h2>{selectedCategory}</h2>
+                            <motion.section
+                                className="category-section"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                            >
+                                <div className="category-header">
+                                    <h2>{selectedCategory}</h2>
+                                    <p>{filteredProducts.length} products available</p>
+                                </div>
                                 <div className="products-grid">
                                     {filteredProducts.length > 0 ? (
                                         filteredProducts.map((p) => (
-                                            <div className="product-card" key={p.id}>
-                                                <img src={p.product_image} alt={p.name} />
-                                                <p className="name">{p.name}</p>
-                                                <p className="price">₹{p.price}</p>
-
-                                                <div className="quantity-control">
-                                                    <button onClick={() => this.handleDecrement(p)}>-</button>
-                                                    <span>{this.getQuantity(p.id)}</span>
-                                                    <button onClick={() => this.handleIncrement(p)}>+</button>
+                                            <motion.div
+                                                className="product-card"
+                                                key={p.id}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3 }}
+                                                whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+                                            >
+                                                <div className="product-image-container">
+                                                    <img src={p.product_image} alt={p.name} />
+                                                </div>
+                                                <div className="product-info">
+                                                    <p className="name">{p.name}</p>
+                                                    <p className="price">₹{p.price}</p>
                                                 </div>
 
-                                                <button
+                                                <div className="quantity-control">
+                                                    <motion.button
+                                                        onClick={() => this.handleDecrement(p)}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        -
+                                                    </motion.button>
+                                                    <span>{this.getQuantity(p.id)}</span>
+                                                    <motion.button
+                                                        onClick={() => this.handleIncrement(p)}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        +
+                                                    </motion.button>
+                                                </div>
+
+                                                <motion.button
                                                     className="add-to-cart"
                                                     onClick={() => this.addToCart(p)}
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
                                                 >
                                                     Add to Cart
-                                                </button>
-                                            </div>
+                                                </motion.button>
+                                            </motion.div>
                                         ))
                                     ) : (
-                                        <p>No products in this category.</p>
+                                        <motion.div
+                                            className="empty-category"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        >
+                                            <p>No products in this category.</p>
+                                            <button
+                                                className="back-btn"
+                                                onClick={() => this.setState({ selectedCategory: null })}
+                                            >
+                                                Back to Home
+                                            </button>
+                                        </motion.div>
                                     )}
                                 </div>
-                            </section>
+                            </motion.section>
                         )}
                     </main>
                 </div>

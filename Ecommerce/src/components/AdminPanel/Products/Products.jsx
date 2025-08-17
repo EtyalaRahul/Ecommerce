@@ -21,17 +21,21 @@ class Products extends Component {
   };
 
   categories = [
-    "Produce",
-    "Prepared foods",
-    "Canned foods & Soups",
+    "Prepared Foods",
+    "Canned Foods & Soups",
     "Bakery",
     "Dairy & Eggs",
     "Frozen",
     "Meat & Seafood",
-    "Toys & Games",
-    "Books & Stationery",
+    "Snacks & Confectionery",
+    "Beverages",
+    "Grains & Pulses",
     "Fruits",
-    "Noodles",
+    "Vegetables",
+    "Spices & Condiments",
+    "Cooking Essentials",
+    "Household Supplies",
+    "Noodles"
   ];
 
   componentDidMount() {
@@ -168,9 +172,8 @@ class Products extends Component {
             {this.categories.map((cat) => (
               <li key={cat}>
                 <button
-                  className={`category-btn ${
-                    selectedCategory === cat ? "active" : ""
-                  }`}
+                  className={`category-btn ${selectedCategory === cat ? "active" : ""
+                    }`}
                   onClick={() => this.setState({ selectedCategory: cat })}
                 >
                   {cat}

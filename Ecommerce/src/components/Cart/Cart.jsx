@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
+import { motion } from "framer-motion";
 import "./Cart.css";
 
 class Cart extends Component {
   state = {
     cart: JSON.parse(localStorage.getItem("cart")) || [],
+    isCheckingOut: false,
   };
 
   updateCart = (updatedCart) => {
@@ -41,46 +43,144 @@ class Cart extends Component {
     );
   };
 
+  handleCheckout = () => {
+    this.setState({ isCheckingOut: true });
+    setTimeout(() => {
+      alert("Order placed successfully!");
+      localStorage.removeItem("cart");
+      this.setState({ cart: [], isCheckingOut: false });
+    }, 1500);
+  };
+
   render() {
-    const { cart } = this.state;
+    const { cart, isCheckingOut } = this.state;
 
     return (
       <>
-        <Navbar />
-        <div className="cart-layout">
-          <h2>🛒 Your Cart</h2>
-          {cart.length === 0 ? (
-            <p>Your cart is empty. <Link to="/">Go shopping!</Link></p>
-          ) : (
-            <div className="cart-items">
-              {cart.map((item) => (
-                <div className="cart-item" key={item.id}>
-                  <img src={item.product_image} alt={item.name} />
-                  <div className="item-details">
-                    <p className="name">{item.name}</p>
-                    <p className="price">₹{item.price}</p>
-                    <div className="quantity-control">
-                      <button onClick={() => this.decrement(item.id)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => this.increment(item.id)}>+</button>
-                    </div>
-                    <button
-                      className="remove-btn"
-                      onClick={() => this.removeItem(item.id)}
-                    >
-                      ✖
-                    </button>
-                  </div>
-                </div>
-              ))}
+        <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} />
+        <motion.div 
+          className="cart-layout"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div className="cart-header">
+            <h2>Your Shopping Cart</h2>
+            <p>{cart.reduce((acc, item) => acc + item.quantity, 0)} items</p>
+          </div>
 
-              <div className="total-bill">
-                <h3>Total: ₹{this.getTotal()}</h3>
-                <button className="checkout-btn">Proceed to Checkout</button>
+          {cart.length === 0 ? (
+            <motion.div 
+              className="empty-cart"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="empty-cart-icon">🛒</div>
+              <h3>Your cart is empty</h3>
+              <p>Looks like you haven't added anything to your cart yet</p>
+              <Link to="/">
+                <motion.button
+                  className="shop-now-btn"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Shop Now
+                </motion.button>
+              </Link>
+            </motion.div>
+          ) : (
+            <>
+              <div className="cart-items">
+                {cart.map((item) => (
+                  <motion.div 
+                    className="cart-item"
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                    layout
+                  >
+                    <div className="item-image">
+                      <img src={item.product_image} alt={item.name} />
+                    </div>
+                    <div className="item-details">
+                      <h3 className="name">{item.name}</h3>
+                      <p className="category">{item.category}</p>
+                      <p className="price">₹{item.price}</p>
+                      
+                      <div className="quantity-control">
+                        <motion.button 
+                          onClick={() => this.decrement(item.id)}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          -
+                        </motion.button>
+                        <span>{item.quantity}</span>
+                        <motion.button 
+                          onClick={() => this.increment(item.id)}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          +
+                        </motion.button>
+                      </div>
+                    </div>
+                    <div className="item-actions">
+                      <motion.button
+                        className="remove-btn"
+                        onClick={() => this.removeItem(item.id)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        ✕
+                      </motion.button>
+                      <p className="item-total">₹{(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </div>
+
+              <motion.div 
+                className="cart-summary"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="summary-row">
+                  <span>Subtotal</span>
+                  <span>₹{this.getTotal().toFixed(2)}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Shipping</span>
+                  <span>FREE</span>
+                </div>
+                <div className="summary-row total">
+                  <span>Total</span>
+                  <span>₹{this.getTotal().toFixed(2)}</span>
+                </div>
+
+                <motion.button
+                  className="checkout-btn"
+                  onClick={this.handleCheckout}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isCheckingOut}
+                >
+                  {isCheckingOut ? (
+                    <span className="spinner"></span>
+                  ) : (
+                    "Proceed to Checkout"
+                  )}
+                </motion.button>
+
+                <Link to="/" className="continue-shopping">
+                  ← Continue Shopping
+                </Link>
+              </motion.div>
+            </>
           )}
-        </div>
+        </motion.div>
       </>
     );
   }
