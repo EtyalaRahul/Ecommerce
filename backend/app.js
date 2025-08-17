@@ -1,6 +1,7 @@
 const db = require("./db");
 const express = require("express");
 const { createRegisterTable } = require("./registerModel");
+const { createProductsTable } = require("./productsModel");
 const app = express();
 const jwt = require("jsonwebtoken");
 app.use(express.json());
@@ -11,6 +12,7 @@ app.use(cors());
 
 //models
 // createRegisterTable();
+// createProductsTable();
 
 //register route
 app.post("/register", async (req, res) => {
@@ -110,4 +112,116 @@ app.get("/", (req, res) => {
 
 app.listen(3000, () => {
   console.log("app is listening");
+});
+
+//add product
+app.post("/api/products/add", (req, res) => {
+  const { name, price, quantity, product_image, category } = req.body;
+
+  if (!name || !price || !quantity || !product_image || !category) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const insertQuery = `
+    INSERT INTO products (name, price, quantity, product_image, category)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    insertQuery,
+    [name, price, quantity, product_image, category],
+    (err, result) => {
+      if (err) {
+        console.error("Error inserting product:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      res.status(201).json({
+        message: "Product added successfully",
+        productId: result.insertId,
+      });
+    }
+  );
+});
+//  Read (Get All Products)
+app.get("/api/products", (req, res) => {
+  const selectQuery = `SELECT * FROM products`;
+
+  db.query(selectQuery, (err, results) => {
+    if (err) {
+      console.error("Error fetching products:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+//  Read (Get Single Product by ID)
+app.get("/api/products/:id", (req, res) => {
+  const { id } = req.params;
+
+  const selectQuery = `SELECT * FROM products WHERE id = ?`;
+
+  db.query(selectQuery, [id], (err, results) => {
+    if (err) {
+      console.error("Error fetching product:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
+
+//  Update (Edit Product by ID)
+app.put("/api/products/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, price, quantity, product_image, category } = req.body;
+
+  const updateQuery = `
+    UPDATE products 
+    SET name = ?, price = ?, quantity = ?, product_image = ?, category = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    updateQuery,
+    [name, price, quantity, product_image, category, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating product:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      res.status(200).json({ message: "Product updated successfully" });
+    }
+  );
+});
+
+//  Delete (Remove Product by ID)
+app.delete("/api/products/:id", (req, res) => {
+  const { id } = req.params;
+
+  const deleteQuery = `DELETE FROM products WHERE id = ?`;
+
+  db.query(deleteQuery, [id], (err, result) => {
+    if (err) {
+      console.error("Error deleting product:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  });
 });

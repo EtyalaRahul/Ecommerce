@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Cookie from "js-cookie";
 import { Navigate } from "react-router-dom";
 import "./login.css";
-import Navbar from "../Navbar/Navbar";
+// import Navbar from "../Navbar/Navbar";
 
 class Login extends Component {
   state = {
@@ -136,7 +136,6 @@ class Login extends Component {
 
     return (
       <>
-        <Navbar />
         <div className="full-center-wrapper">
           <div className="login-container">
             <div className="illustration">
