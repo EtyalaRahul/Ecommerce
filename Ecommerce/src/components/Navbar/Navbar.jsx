@@ -54,6 +54,32 @@ class Navbar extends Component {
                             </li>
                         )}
                     </ul>
+                    <ul
+                        style={{
+                            listStyle: "none",
+                            display: "flex",
+                            gap: "20px",
+                            margin: 0,
+                            padding: 0,
+                        }}
+                    >
+                        {!isLoggedIn && (
+                            <li>
+                                <Link to="/login">Login</Link>
+                            </li>
+                        )}
+                        {isLoggedIn && (
+                            <>
+                                <li>
+                                    <Link to="/">Home</Link>
+                                </li>
+                                <li>
+                                    <Link to="/cart">Cart</Link>
+                                </li>
+                            </>
+                        )}
+                    </ul>
+
                 </div>
 
                 {/* Right Section */}
