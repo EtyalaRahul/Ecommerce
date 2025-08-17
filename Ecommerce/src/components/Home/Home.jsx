@@ -9,303 +9,327 @@ import "./Home.css";
 const BASE_URL = "http://localhost:3000/api";
 
 class Home extends Component {
-    state = {
-        products: [],
-        cart: JSON.parse(localStorage.getItem("cart")) || [],
-        selectedCategory: null,
-        isMobileMenuOpen: false,
-    };
+  state = {
+    products: [],
+    cart: JSON.parse(localStorage.getItem("cart")) || [],
+    selectedCategory: null,
+    isMobileMenuOpen: false,
+    searchQuery: "",
+    priceRange: 1000,
+  };
 
-    categories = [
-        "Prepared Foods",
-        "Canned Foods & Soups",
-        "Bakery",
-        "Dairy & Eggs",
-        "Frozen",
-        "Meat & Seafood",
-        "Snacks & Confectionery",
-        "Beverages",
-        "Grains & Pulses",
-        "Fruits",
-        "Vegetables",
-        "Spices & Condiments",
-        "Cooking Essentials",
-        "Household Supplies",
-        "Noodles"
-    ];
+  categories = [
+    "Prepared Foods",
+    "Canned Foods & Soups",
+    "Bakery",
+    "Dairy & Eggs",
+    "Frozen",
+    "Meat & Seafood",
+    "Snacks & Confectionery",
+    "Beverages",
+    "Grains & Pulses",
+    "Fruits",
+    "Vegetables",
+    "Spices & Condiments",
+    "Cooking Essentials",
+    "Household Supplies",
+    "Noodles",
+  ];
 
-    carouselImages = [
-        "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-        "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-        "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    ];
+  carouselImages = [
+    "https://images.unsplash.com/photo-1556909212-d5b604d0c90d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+  ];
 
-    componentDidMount() {
-        this.fetchProducts();
-        window.addEventListener("resize", this.handleResize);
+  componentDidMount() {
+    this.fetchProducts();
+    window.addEventListener("resize", this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    if (window.innerWidth > 768 && this.state.isMobileMenuOpen) {
+      this.setState({ isMobileMenuOpen: false });
     }
+  };
 
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.handleResize);
+  fetchProducts = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/products`);
+      const data = await res.json();
+      this.setState({ products: data });
+    } catch (err) {
+      console.error(err);
     }
+  };
 
-    handleResize = () => {
-        if (window.innerWidth > 768 && this.state.isMobileMenuOpen) {
-            this.setState({ isMobileMenuOpen: false });
-        }
-    };
+  getQuantity = (productId) => {
+    const { cart } = this.state;
+    const existing = cart.find((item) => item.id === productId);
+    return existing ? existing.quantity : 1;
+  };
 
-    fetchProducts = async () => {
-        try {
-            const res = await fetch(`${BASE_URL}/products`);
-            const data = await res.json();
-            this.setState({ products: data });
-        } catch (err) {
-            console.error(err);
-        }
-    };
+  handleIncrement = (product) => {
+    const { cart } = this.state;
+    const existing = cart.find((item) => item.id === product.id);
+    let updatedCart = existing
+      ? cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      : [...cart, { ...product, quantity: 2 }];
+    this.setState({ cart: updatedCart });
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
-    getQuantity = (productId) => {
-        const { cart } = this.state;
-        const existing = cart.find((item) => item.id === productId);
-        return existing ? existing.quantity : 1;
-    };
+  handleDecrement = (product) => {
+    const { cart } = this.state;
+    const existing = cart.find((item) => item.id === product.id);
+    if (!existing) return;
+    const updatedCart = cart.map((item) =>
+      item.id === product.id
+        ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
+        : item
+    );
+    this.setState({ cart: updatedCart });
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
-    handleIncrement = (product) => {
-        const { cart } = this.state;
-        const existing = cart.find((item) => item.id === product.id);
+  addToCart = (product) => {
+    const { cart } = this.state;
+    const existing = cart.find((item) => item.id === product.id);
+    const updatedCart = existing
+      ? cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      : [...cart, { ...product, quantity: 1 }];
+    this.setState({ cart: updatedCart });
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
-        let updatedCart;
-        if (existing) {
-            updatedCart = cart.map((item) =>
-                item.id === product.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            );
-        } else {
-            updatedCart = [...cart, { ...product, quantity: 2 }];
-        }
+  toggleMobileMenu = () => {
+    this.setState((prev) => ({ isMobileMenuOpen: !prev.isMobileMenuOpen }));
+  };
 
-        this.setState({ cart: updatedCart });
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-    };
+  handleSearchChange = (e) => {
+    this.setState({ searchQuery: e.target.value });
+  };
 
-    handleDecrement = (product) => {
-        const { cart } = this.state;
-        const existing = cart.find((item) => item.id === product.id);
-        if (!existing) return;
+  handlePriceChange = (e) => {
+    this.setState({ priceRange: Number(e.target.value) });
+  };
 
-        let updatedCart = cart.map((item) =>
-            item.id === product.id
-                ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
-                : item
-        );
+  render() {
+    const {
+      products,
+      cart,
+      selectedCategory,
+      isMobileMenuOpen,
+      searchQuery,
+      priceRange,
+    } = this.state;
 
-        this.setState({ cart: updatedCart });
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-    };
+    const filteredProducts = products
+      .filter((p) => !selectedCategory || p.category === selectedCategory)
+      .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter((p) => Number(p.price) <= priceRange);
 
-    addToCart = (product) => {
-        const { cart } = this.state;
-        const existing = cart.find((item) => item.id === product.id);
+    return (
+      <>
+        <Navbar
+          cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)}
+        />
+        <div className="home-layout">
+          <button
+            className="mobile-menu-btn"
+            onClick={this.toggleMobileMenu}
+          >
+            {isMobileMenuOpen ? "✕" : "☰"}
+          </button>
 
-        let updatedCart;
-        if (existing) {
-            updatedCart = cart.map((item) =>
-                item.id === product.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            );
-        } else {
-            updatedCart = [...cart, { ...product, quantity: 1 }];
-        }
+          <aside className={`sidebar ${isMobileMenuOpen ? "open" : ""}`}>
+            <h2 className="sidebar-title">Categories</h2>
+            <ul className="category-list">
+              {this.categories.map((cat) => (
+                <motion.li
+                  key={cat}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <button
+                    className={`category-btn ${
+                      selectedCategory === cat ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      this.setState({ selectedCategory: cat });
+                      if (window.innerWidth <= 768) {
+                        this.setState({ isMobileMenuOpen: false });
+                      }
+                    }}
+                  >
+                    {cat}
+                  </button>
+                </motion.li>
+              ))}
+            </ul>
 
-        this.setState({ cart: updatedCart });
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-    };
+            <motion.div
+              className="cart-summary"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h3>🛒 Cart Summary</h3>
+              <p>{cart.reduce((acc, item) => acc + item.quantity, 0)} items</p>
+              <p>
+                ₹
+                {cart.reduce(
+                  (total, item) => total + Number(item.price) * item.quantity,
+                  0
+                )}
+              </p>
+              <Link to="/cart">
+                <motion.button
+                  className="view-cart-btn"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  View Cart
+                </motion.button>
+              </Link>
+            </motion.div>
+          </aside>
 
-    toggleMobileMenu = () => {
-        this.setState(prevState => ({ isMobileMenuOpen: !prevState.isMobileMenuOpen }));
-    };
+          <main className="main">
+            {/* Carousel */}
+            <div className="carousel-container">
+              <Carousel
+                autoPlay
+                infiniteLoop
+                showThumbs={false}
+                showStatus={false}
+                interval={5000}
+                showArrows={true}
+                dynamicHeight={false}
+                emulateTouch={true}
+              >
+                {this.carouselImages.map((img, index) => (
+                  <div key={index} className="carousel-slide">
+                    <img src={img} alt={`Slide ${index + 1}`} />
+                    <div className="carousel-overlay"></div>
+                    <div className="carousel-content">
+                      <h2>Fresh Groceries Delivered</h2>
+                      <p>
+                        Shop the best quality products at affordable prices
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </Carousel>
+            </div>
 
-    render() {
-        const { products, cart, selectedCategory, isMobileMenuOpen } = this.state;
-        const filteredProducts = selectedCategory
-            ? products.filter((p) => p.category === selectedCategory)
-            : [];
+            {/* Search & Price Filter */}
+            <div className="filter-section">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={this.handleSearchChange}
+              />
+              <div className="price-range">
+                <label>Max Price: ₹{priceRange}</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={priceRange}
+                  onChange={this.handlePriceChange}
+                />
+              </div>
+            </div>
 
-        return (
-            <>
-                <Navbar cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} />
-                <div className="home-layout">
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="mobile-menu-btn"
-                        onClick={this.toggleMobileMenu}
-                    >
-                        {isMobileMenuOpen ? '✕' : '☰'}
-                    </button>
-
-                    <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
-                        <h2 className="sidebar-title">Categories</h2>
-                        <ul className="category-list">
-                            {this.categories.map((cat) => (
-                                <motion.li
-                                    key={cat}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <button
-                                        className={`category-btn ${selectedCategory === cat ? "active" : ""}`}
-                                        onClick={() => {
-                                            this.setState({ selectedCategory: cat });
-                                            if (window.innerWidth <= 768) {
-                                                this.setState({ isMobileMenuOpen: false });
-                                            }
-                                        }}
-                                    >
-                                        {cat}
-                                    </button>
-                                </motion.li>
-                            ))}
-                        </ul>
-
-                        <motion.div
-                            className="cart-summary"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <h3>🛒 Cart Summary</h3>
-                            <p>{cart.reduce((acc, item) => acc + item.quantity, 0)} items</p>
-                            <p>₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</p>
-                            <Link to="/cart">
-                                <motion.button
-                                    className="view-cart-btn"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    View Cart
-                                </motion.button>
-                            </Link>
-                        </motion.div>
-                    </aside>
-
-                    <main className="main">
-                        {!selectedCategory && (
-                            <div className="carousel-container">
-                                <Carousel
-                                    autoPlay
-                                    infiniteLoop
-                                    showThumbs={false}
-                                    showStatus={false}
-                                    interval={5000}
-                                    showArrows={true}
-                                    dynamicHeight={false}
-                                    emulateTouch={true}
-                                >
-                                    {this.carouselImages.map((img, index) => (
-                                        <div key={index} className="carousel-slide">
-                                            <img src={img} alt={`Slide ${index + 1}`} />
-                                            <div className="carousel-overlay"></div>
-                                            <div className="carousel-content">
-                                                <h2>Fresh Groceries Delivered</h2>
-                                                <p>Shop the best quality products at affordable prices</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </Carousel>
-                                <div className="welcome-msg">
-                                    <motion.h2
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.3 }}
-                                    >
-                                        🛍️ Select a category to browse products
-                                    </motion.h2>
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedCategory && (
-                            <motion.section
-                                className="category-section"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                <div className="category-header">
-                                    <h2>{selectedCategory}</h2>
-                                    <p>{filteredProducts.length} products available</p>
-                                </div>
-                                <div className="products-grid">
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((p) => (
-                                            <motion.div
-                                                className="product-card"
-                                                key={p.id}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.3 }}
-                                                whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
-                                            >
-                                                <div className="product-image-container">
-                                                    <img src={p.product_image} alt={p.name} />
-                                                </div>
-                                                <div className="product-info">
-                                                    <p className="name">{p.name}</p>
-                                                    <p className="price">₹{p.price}</p>
-                                                </div>
-
-                                                <div className="quantity-control">
-                                                    <motion.button
-                                                        onClick={() => this.handleDecrement(p)}
-                                                        whileTap={{ scale: 0.9 }}
-                                                    >
-                                                        -
-                                                    </motion.button>
-                                                    <span>{this.getQuantity(p.id)}</span>
-                                                    <motion.button
-                                                        onClick={() => this.handleIncrement(p)}
-                                                        whileTap={{ scale: 0.9 }}
-                                                    >
-                                                        +
-                                                    </motion.button>
-                                                </div>
-
-                                                <motion.button
-                                                    className="add-to-cart"
-                                                    onClick={() => this.addToCart(p)}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                >
-                                                    Add to Cart
-                                                </motion.button>
-                                            </motion.div>
-                                        ))
-                                    ) : (
-                                        <motion.div
-                                            className="empty-category"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                        >
-                                            <p>No products in this category.</p>
-                                            <button
-                                                className="back-btn"
-                                                onClick={() => this.setState({ selectedCategory: null })}
-                                            >
-                                                Back to Home
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </div>
-                            </motion.section>
-                        )}
-                    </main>
+            {/* Products */}
+            <motion.section
+              className="category-section"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {selectedCategory && (
+                <div className="category-header">
+                  <h2>{selectedCategory}</h2>
+                  <p>{filteredProducts.length} products available</p>
                 </div>
-            </>
-        );
-    }
+              )}
+              <div className="products-grid">
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((p) => (
+                    <motion.div
+                      className="product-card"
+                      key={p.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      whileHover={{
+                        y: -5,
+                        boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      <div className="product-image-container">
+                        <img src={p.product_image} alt={p.name} />
+                      </div>
+                      <div className="product-info">
+                        <p className="name">{p.name}</p>
+                        <p className="price">₹{p.price}</p>
+                      </div>
+                      <div className="quantity-control">
+                        <motion.button
+                          onClick={() => this.handleDecrement(p)}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          -
+                        </motion.button>
+                        <span>{this.getQuantity(p.id)}</span>
+                        <motion.button
+                          onClick={() => this.handleIncrement(p)}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          +
+                        </motion.button>
+                      </div>
+                      <motion.button
+                        className="add-to-cart"
+                        onClick={() => this.addToCart(p)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Add to Cart
+                      </motion.button>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div
+                    className="empty-category"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <p>No products found.</p>
+                  </motion.div>
+                )}
+              </div>
+            </motion.section>
+          </main>
+        </div>
+      </>
+    );
+  }
 }
 
 export default Home;
