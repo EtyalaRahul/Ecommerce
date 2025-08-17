@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import "./Products.css";
 
+const BASE_URL = "http://localhost:3000/api"; // ✅ Define once
+
 class Products extends Component {
   state = {
     products: [],
@@ -15,7 +17,7 @@ class Products extends Component {
     uploading: false,
     showDeleteConfirm: false,
     productToDelete: null,
-    selectedCategory: null, // ✅ Track which category is clicked
+    selectedCategory: null,
   };
 
   categories = [
@@ -28,7 +30,8 @@ class Products extends Component {
     "Meat & Seafood",
     "Toys & Games",
     "Books & Stationery",
-    
+    "Fruits",
+    "Noodles",
   ];
 
   componentDidMount() {
@@ -37,7 +40,7 @@ class Products extends Component {
 
   fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/products");
+      const res = await fetch(`${BASE_URL}/products`);
       const data = await res.json();
       this.setState({ products: data });
     } catch (err) {
@@ -62,10 +65,7 @@ class Products extends Component {
     try {
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
+        { method: "POST", body: formData }
       );
       const data = await res.json();
       if (data.secure_url) {
@@ -91,13 +91,13 @@ class Products extends Component {
     const { id, ...data } = this.state.formData;
     try {
       if (id) {
-        await fetch(`http://localhost:3000/api/products/${id}`, {
+        await fetch(`${BASE_URL}/products/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         });
       } else {
-        await fetch("http://localhost:3000/api/products/add", {
+        await fetch(`${BASE_URL}/products/add`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
@@ -122,7 +122,7 @@ class Products extends Component {
   handleDelete = async () => {
     const { productToDelete } = this.state;
     try {
-      await fetch(`http://localhost:3000/api/products/${productToDelete.id}`, {
+      await fetch(`${BASE_URL}/products/${productToDelete.id}`, {
         method: "DELETE",
       });
       this.setState({ showDeleteConfirm: false, productToDelete: null });
@@ -145,11 +145,16 @@ class Products extends Component {
     });
   };
 
+  removeImage = () => {
+    this.setState((prev) => ({
+      formData: { ...prev.formData, product_image: "" },
+    }));
+  };
+
   render() {
     const { products, formData, uploading, showDeleteConfirm, selectedCategory } =
       this.state;
 
-    // ✅ Filter products by selectedCategory
     const filteredProducts = selectedCategory
       ? products.filter((p) => p.category === selectedCategory)
       : [];
@@ -205,7 +210,6 @@ class Products extends Component {
                 required
               />
 
-              {/* ✅ Category dropdown */}
               <select
                 name="category"
                 value={formData.category}
@@ -220,7 +224,6 @@ class Products extends Component {
                 ))}
               </select>
 
-              {/* File input */}
               <input type="file" onChange={this.handleFileSelect} />
 
               {/* Drag & Drop */}
@@ -230,17 +233,12 @@ class Products extends Component {
                   e.preventDefault();
                   e.currentTarget.classList.add("hover");
                 }}
-                onDragLeave={(e) =>
-                  e.currentTarget.classList.remove("hover")
-                }
+                onDragLeave={(e) => e.currentTarget.classList.remove("hover")}
                 onDrop={(e) => {
                   e.preventDefault();
                   e.currentTarget.classList.remove("hover");
                   const files = e.dataTransfer.files;
-                  if (
-                    files.length > 0 &&
-                    files[0].type.startsWith("image/")
-                  ) {
+                  if (files.length > 0 && files[0].type.startsWith("image/")) {
                     this.uploadToCloudinary(files[0]);
                   } else {
                     alert("Please drop a valid image file.");
@@ -252,11 +250,20 @@ class Products extends Component {
 
               {uploading && <p>Uploading...</p>}
               {formData.product_image && (
-                <img
-                  src={formData.product_image}
-                  alt="preview"
-                  className="preview"
-                />
+                <div className="preview-container">
+                  <img
+                    src={formData.product_image}
+                    alt="preview"
+                    className="preview"
+                  />
+                  <button
+                    type="button"
+                    className="remove-image"
+                    onClick={this.removeImage}
+                  >
+                    ✖
+                  </button>
+                </div>
               )}
 
               <button type="submit">
@@ -265,7 +272,6 @@ class Products extends Component {
             </form>
           </div>
 
-          {/* ✅ Show products only when category is selected */}
           {selectedCategory && (
             <section className="category-section">
               <h2>{selectedCategory}</h2>
@@ -301,16 +307,13 @@ class Products extends Component {
           )}
         </main>
 
-        {/* Delete popup */}
         {showDeleteConfirm && (
           <div className="popup">
             <div className="popup-content">
               <p>Delete this product?</p>
               <button onClick={this.handleDelete}>Yes</button>
               <button
-                onClick={() =>
-                  this.setState({ showDeleteConfirm: false })
-                }
+                onClick={() => this.setState({ showDeleteConfirm: false })}
               >
                 No
               </button>

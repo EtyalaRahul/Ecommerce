@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Cookie from "js-cookie";
 import { Navigate } from "react-router-dom";
 import "./login.css";
-// import Navbar from "../Navbar/Navbar";
+
 
 class Login extends Component {
   state = {
@@ -16,7 +16,7 @@ class Login extends Component {
     errorMsg: "",
     loading: false,
     isLoggedIn: false,
-    isRegister: false, // toggle between Login & Register
+    isRegister: false,
   };
 
   handleChange = (e) => {
@@ -45,7 +45,7 @@ class Login extends Component {
       if (!response.ok) {
         this.setState({ errorMsg: data.message || "Login failed" });
       } else {
-        Cookie.set("jwt_token", data.jwt_token, { expires: 7 });
+        Cookie.set("jwt_token", data.jwt_token, { expires: 10 });
         this.setState({ isLoggedIn: true });
       }
     } catch {

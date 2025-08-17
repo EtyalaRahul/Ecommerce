@@ -17,6 +17,9 @@
   background: white;
   padding: 20px;
   border-right: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .sidebar h2 {
@@ -33,13 +36,20 @@
   margin: 10px 0;
 }
 
-.sidebar a {
-  text-decoration: none;
-  color: var(--text);
+.category-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
   font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: left;
+  width: 100%;
 }
 
-.sidebar a:hover {
+.category-btn:hover,
+.category-btn.active {
   color: var(--primary);
 }
 
@@ -59,7 +69,8 @@
   max-width: 600px;
 }
 
-.form-card input {
+.form-card input,
+.form-card select {
   display: block;
   width: 100%;
   padding: 10px;
@@ -76,22 +87,52 @@
   width: 100%;
   border-radius: 6px;
   cursor: pointer;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .form-card button:hover {
   background: #e35a4f;
 }
 
+/* ✅ Image Preview with remove button */
+.preview-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+}
+
 .preview {
   max-width: 120px;
-  margin-top: 10px;
   border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4444;
+  border: none;
+  color: white;
+  font-size: 14px;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  line-height: 20px;
+  padding: 0;
+}
+
+.remove-image:hover {
+  background: #cc0000;
 }
 
 /* ✅ Drag & Drop */
 #drop-area {
   border: 3px dashed #ccc;
-  border-radius: 20px;
+  border-radius: 12px;
   width: 100%;
   height: 150px;
   margin: 10px 0;
@@ -106,11 +147,11 @@
 }
 
 #drop-area.hover {
-  border-color: #333;
-  color: #000;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
-/* Categories */
+/* Categories section */
 .category-section {
   margin-bottom: 40px;
 }
@@ -133,6 +174,11 @@
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
 }
 
 .product-card img {
@@ -185,38 +231,10 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-}
-/* Sidebar responsive */
-.sidebar {
-  width: 220px;
-  background: white;
-  padding: 20px;
-  border-right: 1px solid #eee;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  max-width: 300px;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  margin: 10px 0;
-}
-
-.sidebar a {
-  text-decoration: none;
-  color: var(--text);
-  font-weight: 500;
-}
-
-.sidebar a:hover {
-  color: var(--primary);
-}
-
-/* Responsive: collapse sidebar into top menu */
+/* ✅ Responsive */
 @media (max-width: 768px) {
   .products-layout {
     flex-direction: column;
@@ -235,21 +253,11 @@
   .sidebar li {
     margin: 0;
   }
+  .form-card {
+    width: 100%;
+  }
 }
-.category-btn {
-  background: none;
-  border: none;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  padding: 6px 0;
-  text-align: left;
-  width: 100%;
+/* Hide the default Choose File input */
+#fileElem {
+  display: none; /* removes the visible "Choose File" */
 }
-
-.category-btn:hover,
-.category-btn.active {
-  color: var(--primary);
-}
-
